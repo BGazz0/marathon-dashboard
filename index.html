@@ -17,6 +17,20 @@ h1 {
   padding: 16px;
 }
 
+/* 🔵 NEW BUTTON STYLE */
+.auth-button {
+  display: block;
+  text-align: center;
+  margin: 10px auto 20px auto;
+  padding: 12px 16px;
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  width: fit-content;
+}
+
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -90,11 +104,17 @@ input[type="checkbox"] {
 <body>
 
 <h1>🏃 Training Calendar</h1>
+
+<!-- 🔵 NEW BUTTON -->
+<a href="/api/auth" class="auth-button">
+  Connect Google Calendar
+</a>
+
 <div id="calendar"></div>
 
 <script>
 const startDate = new Date("2026-03-30");
-const totalDays = 28; // 4 weeks
+const totalDays = 28;
 
 const calendar = document.getElementById("calendar");
 
