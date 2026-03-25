@@ -1,16 +1,19 @@
-export default function handler(req, res) {
-  const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+import { google } from 'googleapis';
 
-  const redirect_uri = `${req.headers.origin}/api/auth/callback`;
+export default async function handler(req, res) {
+  const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.REDIRECT_URI // This must match the Google Cloud console exactly
+  );
 
-  const authUrl =
-    `https://accounts.google.com/o/oauth2/v2/auth` +
-    `?client_id=${CLIENT_ID}` +
-    `&redirect_uri=${redirect_uri}` +
-    `&response_type=code` +
-    `&scope=https://www.googleapis.com/auth/calendar` +
-    `&access_type=offline` +
-    `&prompt=consent`;
+  const scopes = ['https://www.googleapis.com/auth/calendar'];
 
-  res.redirect(authUrl);
+  const url = oauth2Client.generateAuthUrl({
+    access_type: 'offline', // Gets a refresh_token for persistent access
+    scope: scopes,
+    prompt: 'consent',
+  });
+
+  res.redirect(url);
 }
