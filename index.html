@@ -1,119 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Marathon Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Calendar</title>
 
 <style>
 body {
-  font-family: system-ui;
-  background:#0f0f0f;
-  color:#fff;
-  margin:0;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #0b0f14;
+  color: #fff;
 }
 
 h1 {
-  text-align:center;
-  padding:12px;
+  text-align: center;
+  padding: 16px;
 }
 
-.week {
-  margin:10px;
-  padding:10px;
-  background:#1a1a1a;
-  border-radius:12px;
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  padding: 10px;
 }
 
 .day {
-  background:#222;
-  margin-bottom:8px;
-  border-radius:10px;
-  padding:10px;
+  background: #121826;
+  border-radius: 12px;
+  padding: 10px;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
 }
 
-.day-title {
-  display:flex;
-  justify-content:space-between;
-  font-weight:bold;
+.day h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  text-align: center;
+  color: #9ca3af;
 }
 
-input[type="checkbox"] {
-  transform: scale(1.3);
+.block {
+  flex: 1;
+  margin-bottom: 6px;
+}
+
+.block label {
+  font-size: 11px;
+  color: #60a5fa;
 }
 
 textarea {
-  width:100%;
-  margin-top:8px;
-  background:#111;
-  color:#fff;
-  border:none;
-  border-radius:6px;
-  padding:6px;
-  resize:vertical;
+  width: 100%;
+  height: 40px;
+  resize: none;
+  border: none;
+  border-radius: 6px;
+  padding: 4px;
+  background: #0f172a;
+  color: white;
+  font-size: 12px;
 }
 
-.run { color:#4caf50; }
-.long { color:#ff9800; }
-.cycle { color:#9c27b0; }
-.rest { color:#777; }
-</style>
+.checkbox {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
 
+input[type="checkbox"] {
+  transform: scale(1.1);
+}
+
+.header {
+  text-align: center;
+  padding: 10px;
+  font-size: 18px;
+  color: #60a5fa;
+}
+
+.week {
+  margin-bottom: 20px;
+}
+</style>
 </head>
 
 <body>
 
-<h1>🏃 Marathon Dashboard</h1>
-
+<h1>🏃 Training Calendar</h1>
 <div id="calendar"></div>
 
 <script>
 const startDate = new Date("2026-03-30");
-const weeks = 4; // start with 4 weeks, we can expand later
+const totalDays = 28; // 4 weeks
 
-function saveData(key, value){
+const calendar = document.getElementById("calendar");
+
+function save(key, value){
   localStorage.setItem(key, value);
 }
 
-function loadData(key){
+function load(key){
   return localStorage.getItem(key) || "";
 }
 
-function createDay(date){
-  const id = date.toISOString().split("T")[0];
-
+function createBlock(dateKey, label){
   return `
-  <div class="day">
-    <div class="day-title">
-      <span>${date.toDateString()}</span>
-      <input type="checkbox" onchange="saveData('${id}-done', this.checked)" ${loadData(id+"-done")==="true"?"checked":""}>
+  <div class="block">
+    <label>${label}</label>
+    <textarea oninput="save('${dateKey}-${label}', this.value)">${load(dateKey + "-" + label)}</textarea>
+    <div class="checkbox">
+      <input type="checkbox" onchange="save('${dateKey}-${label}-done', this.checked)" ${load(dateKey + "-" + label + "-done") === "true" ? "checked" : ""}>
+      Done
     </div>
-
-    <div>
-      <span class="run">Run / Long / Cycle / Strength</span>
-    </div>
-
-    <textarea placeholder="Notes (meals, feeling, etc)" 
-      oninput="saveData('${id}-notes', this.value)">
-      ${loadData(id+"-notes")}
-    </textarea>
   </div>`;
 }
 
-let html = "";
+let weekHTML = "";
 
-for(let w=0; w<weeks; w++){
-  html += `<div class="week"><h2>Week ${w+1}</h2>`;
+for(let i = 0; i < totalDays; i++){
+  let date = new Date(startDate);
+  date.setDate(startDate.getDate() + i);
 
-  for(let d=0; d<7; d++){
-    let date = new Date(startDate);
-    date.setDate(startDate.getDate() + (w*7 + d));
-    html += createDay(date);
-  }
+  let key = date.toISOString().split("T")[0];
 
-  html += `</div>`;
+  let dayHTML = `
+  <div class="day">
+    <h3>${date.toDateString()}</h3>
+
+    ${createBlock(key, "Morning")}
+    ${createBlock(key, "Lunch")}
+    ${createBlock(key, "Post-Work")}
+    ${createBlock(key, "Night")}
+  </div>`;
+
+  weekHTML += dayHTML;
 }
 
-document.getElementById("calendar").innerHTML = html;
+calendar.innerHTML = `<div class="calendar">${weekHTML}</div>`;
 </script>
 
 </body>
